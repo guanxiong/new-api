@@ -5,8 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'web/**'
-      - 'Dockerfile'
+      - 'web/default/**'
       - 'Dockerfile.fork'
       - '.github/workflows/docker-build-fork.yml'
   workflow_dispatch:
