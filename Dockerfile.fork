@@ -25,7 +25,7 @@ COPY . .
 COPY --from=builder /build/web/default/dist ./web/default/dist
 RUN go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$(cat VERSION)'" -o new-api
 
-FROM alpine:3.21@sha256:efba4860dcb866b62ee22ac56f0c18d0cfce77e9c8dc69ac5b8e6464d1cc4c88
+FROM alpine:3.21
 RUN apk add --no-cache ca-certificates tzdata bash curl \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone \
