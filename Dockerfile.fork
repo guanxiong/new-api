@@ -24,7 +24,7 @@ RUN go mod download
 
 COPY . .
 COPY --from=builder /build/web/default/dist ./web/default/dist
-RUN mkdir -p ./web/classic/dist && touch ./web/classic/dist/.keep
+RUN mkdir -p ./web/classic/dist && echo '<!DOCTYPE html><html><body>Classic theme not available</body></html>' > ./web/classic/dist/index.html
 RUN go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$(cat VERSION)'" -o new-api
 
 FROM alpine:3.21
