@@ -28,41 +28,7 @@ import { useAuthStore } from '@/stores/auth-store'
 
 import { CTA, Features, Hero, HowItWorks, Stats } from './components'
 import { useHomePageContent } from './hooks'
-
-function resolveAuthenticatedHomeCtas(
-  content: string,
-  isAuthenticated: boolean,
-  fallbackLabel: string
-): string {
-  if (!isAuthenticated || !content.includes('data-auth-cta')) {
-    return content
-  }
-
-  const template = document.createElement('template')
-  template.innerHTML = content
-
-  template.content
-    .querySelectorAll<HTMLAnchorElement>('a[data-auth-cta]')
-    .forEach((link) => {
-      link.setAttribute(
-        'href',
-        link.dataset.authenticatedHref || '/dashboard'
-      )
-
-      const label = link.dataset.authenticatedLabel || fallbackLabel
-      const labelElement = link.querySelector<HTMLElement>(
-        '[data-auth-cta-label]'
-      )
-
-      if (labelElement) {
-        labelElement.textContent = label
-      } else {
-        link.textContent = label
-      }
-    })
-
-  return template.innerHTML
-}
+import { resolveAuthenticatedHomeCtas } from './lib/auth-aware-content'
 
 export function Home() {
   const { i18n, t } = useTranslation()
