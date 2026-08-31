@@ -233,21 +233,21 @@ export function CodexMotionDemo({
                   data-codex-step={motionStep.id}
                   aria-current={isActive ? 'step' : undefined}
                   onClick={() => selectStep(index)}
-                  className='group relative z-10 flex min-w-0 flex-col items-center rounded-xl px-1 py-1 text-center focus-visible:ring-2 focus-visible:ring-amber-300/70 focus-visible:outline-none'
+                  className='group relative z-10 flex min-w-0 flex-col items-center rounded-xl px-1 py-1 text-center focus-visible:outline-none'
                 >
                   <motion.span
+                    data-codex-step-node
                     initial={false}
                     animate={
                       reduceMotion
                         ? undefined
                         : {
-                            y: isActive ? -3 : 0,
                             scale: isActive ? 1.06 : 1,
                           }
                     }
                     transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
                     className={cn(
-                      'relative flex size-11 items-center justify-center rounded-xl border transition-colors duration-300',
+                      'relative flex size-11 items-center justify-center rounded-xl border transition-colors duration-300 group-focus-visible:ring-2 group-focus-visible:ring-amber-300/70 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#101114]',
                       nodeStateClass
                     )}
                   >
