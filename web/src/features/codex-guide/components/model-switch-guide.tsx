@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { ArrowDown, CheckCircle2, RefreshCw, Sparkles } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const MODEL_SWITCH_HASH = '#switch-model'
@@ -27,25 +27,52 @@ const MODEL_OPTIONS = [
     id: 'gpt-5.6-sol',
     label: 'Sol',
     descriptionKey: 'codexGuide.modelSwitch.solDescription',
-    active: false,
   },
   {
     id: 'gpt-5.6-terra',
     label: 'Terra',
     descriptionKey: 'codexGuide.modelSwitch.terraDescription',
-    active: false,
   },
   {
     id: 'gpt-5.6-luna',
     label: 'Luna',
     descriptionKey: 'codexGuide.modelSwitch.lunaDescription',
-    active: true,
   },
 ] as const
 
 export function ModelSwitchGuide() {
   const { t } = useTranslation()
   const sectionRef = useRef<HTMLElement>(null)
+  const modelButtonRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const [selectedModelIndex, setSelectedModelIndex] = useState(2)
+  const selectedModel = MODEL_OPTIONS[selectedModelIndex]
+
+  const selectModel = (modelIndex: number, moveFocus = false) => {
+    setSelectedModelIndex(modelIndex)
+    if (moveFocus) modelButtonRefs.current[modelIndex]?.focus()
+  }
+
+  const handleModelKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    modelIndex: number
+  ) => {
+    let nextIndex: number | undefined
+
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      nextIndex = (modelIndex + 1) % MODEL_OPTIONS.length
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      nextIndex = (modelIndex - 1 + MODEL_OPTIONS.length) % MODEL_OPTIONS.length
+    } else if (event.key === 'Home') {
+      nextIndex = 0
+    } else if (event.key === 'End') {
+      nextIndex = MODEL_OPTIONS.length - 1
+    }
+
+    if (nextIndex === undefined) return
+
+    event.preventDefault()
+    selectModel(nextIndex, true)
+  }
 
   useEffect(() => {
     if (window.location.hash !== MODEL_SWITCH_HASH) return
@@ -98,7 +125,7 @@ export function ModelSwitchGuide() {
                   {t('codexGuide.modelSwitch.after')}
                 </p>
                 <code className='mt-2 block overflow-x-auto font-mono text-xs text-sky-100 sm:text-sm'>
-                  model = &quot;gpt-5.6-luna&quot;
+                  {`model = "${selectedModel.id}"`}
                 </code>
               </div>
             </div>
@@ -109,30 +136,51 @@ export function ModelSwitchGuide() {
           </div>
 
           <div>
-            <div className='grid gap-3 sm:grid-cols-3'>
-              {MODEL_OPTIONS.map((model) => (
-                <article
-                  key={model.id}
-                  className={`rounded-2xl border p-4 ${model.active ? 'border-sky-300/30 bg-sky-300/[0.07]' : 'border-white/9 bg-black/25'}`}
-                >
-                  <div className='flex items-center justify-between gap-3'>
-                    <h3 className='text-sm font-semibold text-white'>
-                      {model.label}
-                    </h3>
-                    {model.active ? (
-                      <span className='rounded-full bg-sky-300/12 px-2 py-1 font-mono text-[9px] tracking-wide text-sky-200 uppercase'>
-                        {t('codexGuide.modelSwitch.target')}
+            <div
+              role='radiogroup'
+              aria-label={t('codexGuide.modelSwitch.selectLabel')}
+              className='grid gap-3 sm:grid-cols-3'
+            >
+              {MODEL_OPTIONS.map((model, modelIndex) => {
+                const isSelected = modelIndex === selectedModelIndex
+
+                return (
+                  <button
+                    ref={(element) => {
+                      modelButtonRefs.current[modelIndex] = element
+                    }}
+                    key={model.id}
+                    type='button'
+                    role='radio'
+                    aria-checked={isSelected}
+                    aria-describedby={`model-description-${modelIndex}`}
+                    tabIndex={isSelected ? 0 : -1}
+                    onClick={() => selectModel(modelIndex)}
+                    onKeyDown={(event) => handleModelKeyDown(event, modelIndex)}
+                    className={`cursor-pointer rounded-2xl border p-4 text-left focus-visible:ring-2 focus-visible:ring-sky-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0c10] focus-visible:outline-none ${isSelected ? 'border-sky-300/45 bg-sky-300/[0.09]' : 'border-white/9 bg-black/25 hover:border-white/20'}`}
+                  >
+                    <span className='flex items-center justify-between gap-3'>
+                      <span className='text-sm font-semibold text-white'>
+                        {model.label}
                       </span>
-                    ) : null}
-                  </div>
-                  <code className='mt-3 block font-mono text-[11px] text-white/65'>
-                    {model.id}
-                  </code>
-                  <p className='mt-3 text-xs leading-5 text-white/40'>
-                    {t(model.descriptionKey)}
-                  </p>
-                </article>
-              ))}
+                      {isSelected ? (
+                        <span className='rounded-full bg-sky-300/12 px-2 py-1 font-mono text-[9px] tracking-wide text-sky-200 uppercase'>
+                          {t('codexGuide.modelSwitch.target')}
+                        </span>
+                      ) : null}
+                    </span>
+                    <code className='mt-3 block font-mono text-[11px] text-white/65'>
+                      {model.id}
+                    </code>
+                    <span
+                      id={`model-description-${modelIndex}`}
+                      className='mt-3 block text-xs leading-5 text-white/40'
+                    >
+                      {t(model.descriptionKey)}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
 
             <ol className='mt-5 grid gap-3'>

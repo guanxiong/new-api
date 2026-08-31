@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import { ModelSwitchGuide } from '../model-switch-guide'
@@ -34,6 +35,36 @@ describe('Codex model switch guide', () => {
     expect(screen.getByText('gpt-5.6-terra')).toBeInTheDocument()
     expect(screen.getByText('gpt-5.6-luna')).toBeInTheDocument()
     expect(screen.getByText('model = "gpt-5.6-luna"')).toBeInTheDocument()
+  })
+
+  test('updates the target configuration when a model card is selected', async () => {
+    const user = userEvent.setup()
+    render(<ModelSwitchGuide />)
+
+    const terra = screen.getByRole('radio', { name: /Terra/ })
+    const luna = screen.getByRole('radio', { name: /Luna/ })
+
+    expect(luna).toHaveAttribute('aria-checked', 'true')
+    await user.click(terra)
+
+    expect(terra).toHaveAttribute('aria-checked', 'true')
+    expect(luna).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByText('model = "gpt-5.6-terra"')).toBeInTheDocument()
+  })
+
+  test('supports arrow-key selection within the model radio group', async () => {
+    const user = userEvent.setup()
+    render(<ModelSwitchGuide />)
+
+    const sol = screen.getByRole('radio', { name: /Sol/ })
+    const luna = screen.getByRole('radio', { name: /Luna/ })
+    luna.focus()
+
+    await user.keyboard('{ArrowRight}')
+
+    expect(sol).toHaveFocus()
+    expect(sol).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByText('model = "gpt-5.6-sol"')).toBeInTheDocument()
   })
 
   test('scrolls the shared hash link directly to the switch guide', async () => {
