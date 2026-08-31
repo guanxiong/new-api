@@ -20,7 +20,6 @@ import { Link } from '@tanstack/react-router'
 import {
   ArrowRight,
   Check,
-  Copy,
   FileCode2,
   KeyRound,
   RefreshCw,
@@ -30,7 +29,7 @@ import {
   TriangleAlert,
 } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
@@ -39,77 +38,9 @@ import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { CodexMotionDemo } from './components/codex-motion-demo'
+import { ConfigCard } from './components/config-card'
 import { ModelSwitchGuide } from './components/model-switch-guide'
 import { CODEX_DIRECT_TOKEN_CONFIG, CODEX_PROVIDER_CONFIG } from './lib/config'
-
-type CopyCodeProps = {
-  text: string
-  label: string
-}
-
-function CopyCode({ text, label }: CopyCodeProps) {
-  const { t } = useTranslation()
-  const [copied, setCopied] = useState(false)
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1600)
-    } catch {
-      setCopied(false)
-    }
-  }
-
-  return (
-    <button
-      type='button'
-      onClick={() => void copy()}
-      className='inline-flex h-8 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-medium text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-amber-300/70 focus-visible:outline-none'
-      aria-label={`${t('Copy')} ${label}`}
-    >
-      {copied ? (
-        <Check className='size-3.5 text-emerald-300' aria-hidden='true' />
-      ) : (
-        <Copy className='size-3.5' aria-hidden='true' />
-      )}
-      {copied ? t('Copied') : t('Copy')}
-    </button>
-  )
-}
-
-function ConfigCard({
-  title,
-  eyebrow,
-  code,
-  tone = 'recommended',
-}: {
-  title: string
-  eyebrow: string
-  code: string
-  tone?: 'recommended' | 'fallback'
-}) {
-  return (
-    <article className='overflow-hidden rounded-2xl border border-white/10 bg-[#0b0c10]'>
-      <div className='flex items-center justify-between gap-4 border-b border-white/8 px-4 py-3 sm:px-5'>
-        <div className='min-w-0'>
-          <p
-            className={`font-mono text-[9px] tracking-[0.16em] uppercase ${tone === 'recommended' ? 'text-emerald-300' : 'text-amber-300'}`}
-          >
-            {eyebrow}
-          </p>
-          <h3 className='mt-1 truncate text-sm font-semibold text-white'>
-            {title}
-          </h3>
-        </div>
-        <CopyCode text={code} label={title} />
-      </div>
-      <pre className='overflow-x-auto px-5 py-5 font-mono text-[11px] leading-7 text-white/70 sm:text-xs'>
-        <code>{code}</code>
-      </pre>
-    </article>
-  )
-}
 
 export function CodexGuide() {
   const { t } = useTranslation()
@@ -265,6 +196,7 @@ export function CodexGuide() {
                 eyebrow={t('codexGuide.recommended')}
                 title='~/.codex/config.toml'
                 code={CODEX_PROVIDER_CONFIG}
+                allowLocalFileEditing
               />
 
               <div className='rounded-2xl border border-white/9 bg-black/25 p-5 sm:p-6'>
