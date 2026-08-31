@@ -39,6 +39,7 @@ import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { CodexMotionDemo } from './components/codex-motion-demo'
+import { ModelSwitchGuide } from './components/model-switch-guide'
 import { CODEX_DIRECT_TOKEN_CONFIG, CODEX_PROVIDER_CONFIG } from './lib/config'
 
 type CopyCodeProps = {
@@ -212,6 +213,8 @@ export function CodexGuide() {
             <CodexMotionDemo />
           </div>
         </section>
+
+        <ModelSwitchGuide />
 
         <section
           id='setup'
