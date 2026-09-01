@@ -38,12 +38,12 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       >
         <div className='relative h-8 w-8'>
           {loading ? (
-            <Skeleton className='absolute inset-0 rounded-lg' />
+            <Skeleton className='absolute inset-0 rounded-[22%]' />
           ) : (
             <img
               src={logo}
               alt={t('Logo')}
-              className='h-8 w-8 rounded-lg object-cover'
+              className='h-8 w-8 rounded-[22%] object-cover'
             />
           )}
         </div>
