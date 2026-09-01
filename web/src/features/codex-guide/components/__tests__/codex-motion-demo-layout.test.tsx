@@ -42,6 +42,37 @@ describe('Codex motion guide layout', () => {
       throw new Error('Expected the task step node to be rendered')
     }
     expect(taskNode.style.transform).not.toContain('translate')
+
+    const signalTrack = container.querySelector('[data-codex-signal-track]')
+    const stepGrid = signalTrack?.parentElement
+    expect(signalTrack).toHaveClass('top-[1.625rem]')
+    expect(stepGrid).toHaveClass('lg:gap-0')
+  })
+
+  test('fills the signal line exactly to each active step', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<CodexMotionDemo autoPlay={false} />)
+    const signal = container.querySelector('[data-codex-signal-motion]')
+    const steps = [
+      ...container.querySelectorAll<HTMLButtonElement>('[data-codex-step]'),
+    ]
+
+    expect(signal).toHaveAttribute('data-codex-signal-progress', '0')
+
+    await user.click(steps[1])
+    expect(signal).toHaveAttribute(
+      'data-codex-signal-progress',
+      '0.3333333333333333'
+    )
+
+    await user.click(steps[2])
+    expect(signal).toHaveAttribute(
+      'data-codex-signal-progress',
+      '0.6666666666666666'
+    )
+
+    await user.click(steps[3])
+    expect(signal).toHaveAttribute('data-codex-signal-progress', '1')
   })
 
   test('draws keyboard focus around the compact node instead of the grid cell', () => {

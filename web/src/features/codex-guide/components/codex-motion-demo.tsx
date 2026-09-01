@@ -39,6 +39,7 @@ import {
 const STEP_INTERVAL_MS = 1250
 
 const STEP_ICONS = [FileCode2, KeyRound, Server, CheckCircle2] as const
+const LAST_MOTION_STEP_INDEX = CODEX_MOTION_STEPS.length - 1
 
 type CodexMotionDemoProps = {
   autoPlay?: boolean
@@ -60,8 +61,11 @@ export function CodexMotionDemo({
     () => new Set<number>(step.highlightedLines),
     [step.highlightedLines]
   )
-  const isLastStep = activeStep >= CODEX_MOTION_STEPS.length - 1
+  const isLastStep = activeStep >= LAST_MOTION_STEP_INDEX
   const isAnimating = isPlaying && !isLastStep
+  const signalProgress = reduceMotion
+    ? 1
+    : activeStep / LAST_MOTION_STEP_INDEX
   let PlaybackIcon = Play
   if (isAnimating) {
     PlaybackIcon = Pause
@@ -193,19 +197,19 @@ export function CodexMotionDemo({
         </div>
 
         <div className='flex min-w-0 flex-col rounded-2xl border border-white/10 bg-white/[0.035] p-4 sm:p-5'>
-          <div className='relative grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-2'>
+          <div className='relative grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-0'>
             <div
               aria-hidden='true'
-              className='absolute top-[1.35rem] right-[12.5%] left-[12.5%] hidden h-px bg-white/10 lg:block'
+              data-codex-signal-track
+              className='absolute top-[1.625rem] right-[12.5%] left-[12.5%] hidden h-px bg-white/10 lg:block'
             >
               <motion.span
                 data-codex-signal-motion
+                data-codex-signal-progress={signalProgress}
                 className='block h-px origin-left bg-gradient-to-r from-amber-300 via-orange-400 to-emerald-300 shadow-[0_0_12px_rgba(251,191,36,0.7)]'
                 initial={false}
                 animate={{
-                  scaleX: reduceMotion
-                    ? 1
-                    : (activeStep + 0.15) / CODEX_MOTION_STEPS.length,
+                  transform: `scaleX(${signalProgress})`,
                 }}
                 transition={{ duration: 0.55, ease: [0.33, 1, 0.68, 1] }}
               />
