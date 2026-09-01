@@ -45,7 +45,7 @@ describe('Codex motion guide layout', () => {
 
     const signalTrack = container.querySelector('[data-codex-signal-track]')
     const stepGrid = signalTrack?.parentElement
-    expect(signalTrack).toHaveClass('top-[1.625rem]')
+    expect(signalTrack).toHaveClass('top-[calc(1.625rem-0.5px)]')
     expect(stepGrid).toHaveClass('lg:gap-0')
   })
 

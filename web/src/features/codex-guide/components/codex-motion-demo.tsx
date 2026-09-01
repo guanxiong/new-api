@@ -31,10 +31,7 @@ import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 
-import {
-  CODEX_MOTION_STEPS,
-  CODEX_PROVIDER_CONFIG_LINES,
-} from '../lib/config'
+import { CODEX_MOTION_STEPS, CODEX_PROVIDER_CONFIG_LINES } from '../lib/config'
 
 const STEP_INTERVAL_MS = 1250
 
@@ -63,9 +60,7 @@ export function CodexMotionDemo({
   )
   const isLastStep = activeStep >= LAST_MOTION_STEP_INDEX
   const isAnimating = isPlaying && !isLastStep
-  const signalProgress = reduceMotion
-    ? 1
-    : activeStep / LAST_MOTION_STEP_INDEX
+  const signalProgress = reduceMotion ? 1 : activeStep / LAST_MOTION_STEP_INDEX
   let PlaybackIcon = Play
   if (isAnimating) {
     PlaybackIcon = Pause
@@ -153,7 +148,10 @@ export function CodexMotionDemo({
         <div className='overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-2xl shadow-black/30'>
           <div className='flex items-center justify-between border-b border-white/8 px-4 py-3'>
             <div className='flex items-center gap-2 text-xs text-white/55'>
-              <FileCode2 className='size-3.5 text-amber-300' aria-hidden='true' />
+              <FileCode2
+                className='size-3.5 text-amber-300'
+                aria-hidden='true'
+              />
               <span>~/.codex/config.toml</span>
             </div>
             <span className='rounded-full border border-emerald-300/15 bg-emerald-300/8 px-2 py-1 font-mono text-[9px] tracking-[0.14em] text-emerald-300/80 uppercase'>
@@ -183,12 +181,10 @@ export function CodexMotionDemo({
                       highlighted && 'text-white'
                     )}
                   >
-                    <span className='select-none text-right text-white/20'>
+                    <span className='text-right text-white/20 select-none'>
                       {index + 1}
                     </span>
-                    <span className='pl-4'>
-                      {line || '\u00A0'}
-                    </span>
+                    <span className='pl-4'>{line || '\u00A0'}</span>
                   </motion.span>
                 )
               })}
@@ -201,7 +197,7 @@ export function CodexMotionDemo({
             <div
               aria-hidden='true'
               data-codex-signal-track
-              className='absolute top-[1.625rem] right-[12.5%] left-[12.5%] hidden h-px bg-white/10 lg:block'
+              className='absolute top-[calc(1.625rem-0.5px)] right-[12.5%] left-[12.5%] hidden h-px bg-white/10 lg:block'
             >
               <motion.span
                 data-codex-signal-motion
@@ -275,7 +271,9 @@ export function CodexMotionDemo({
               <motion.div
                 key={step.id}
                 initial={
-                  reduceMotion ? false : { opacity: 0, y: 10, filter: 'blur(4px)' }
+                  reduceMotion
+                    ? false
+                    : { opacity: 0, y: 10, filter: 'blur(4px)' }
                 }
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                 exit={
@@ -288,7 +286,10 @@ export function CodexMotionDemo({
               >
                 <div className='flex items-center gap-2 font-mono text-[10px] tracking-[0.14em] text-amber-300 uppercase'>
                   <span>{String(activeStep + 1).padStart(2, '0')}</span>
-                  <span aria-hidden='true' className='h-px w-7 bg-amber-300/35' />
+                  <span
+                    aria-hidden='true'
+                    className='h-px w-7 bg-amber-300/35'
+                  />
                   <span>{t(step.labelKey)}</span>
                 </div>
                 <h3 className='mt-4 text-xl font-semibold tracking-tight text-white sm:text-2xl'>
