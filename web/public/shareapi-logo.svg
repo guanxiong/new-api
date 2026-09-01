@@ -1,18 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-labelledby="title">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-labelledby="title description">
   <title id="title">Share API</title>
+  <desc id="description">Orange gradient square with a refined dark dollar symbol.</desc>
   <defs>
-    <linearGradient id="shareapi-gradient" x1="24" y1="20" x2="158" y2="164" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F5A623" />
-      <stop offset="1" stop-color="#FF6B35" />
+    <linearGradient id="shareapi-gradient" x1="28" y1="18" x2="154" y2="164" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB238" />
+      <stop offset="0.48" stop-color="#FF8B2C" />
+      <stop offset="1" stop-color="#FF6338" />
     </linearGradient>
+    <radialGradient id="shareapi-highlight" cx="0" cy="0" r="1" gradientTransform="translate(51 33) rotate(43) scale(111 93)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.18" />
+      <stop offset="0.7" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
   </defs>
   <rect width="180" height="180" rx="38" fill="url(#shareapi-gradient)" />
+  <rect width="180" height="180" rx="38" fill="url(#shareapi-highlight)" />
+  <rect x="1" y="1" width="178" height="178" rx="37" fill="none" stroke="#FFFFFF" stroke-opacity="0.2" stroke-width="2" />
   <path
-    d="M90 39v102M122 58H80c-15 0-25 8-25 20 0 13 11 18 35 24 24 6 35 12 35 27 0 14-13 24-32 24H55"
-    fill="none"
-    stroke="#0A0A0A"
-    stroke-width="14"
-    stroke-linecap="round"
-    stroke-linejoin="round"
+    d="M693.6875-20Q447.875-20 291.046875 81.765625Q134.21875 183.53125 108.125 390.3125L362.125 398.75Q389.4375 289.46875 476.671875 233.578125Q563.90625 177.6875 692.625 177.6875Q770.03125 177.6875 833.90625 203.6875Q897.78125 229.6875 935.765625 275.625Q973.75 321.5625 973.75 381.875Q973.75 468.96875 920.3125 516.375Q866.875 563.78125 753.3125 591.4375L510.4375 649.125Q347.53125 685.96875 250.5625 779.40625Q153.59375 872.84375 152 1031.0625Q150.9375 1162.0625 221.6875 1259.46875Q292.4375 1356.875 416.171875 1410.4375Q539.90625 1464 697.0625 1464Q853.90625 1464 967.765625 1406.578125Q1081.625 1349.15625 1143.859375 1253.15625Q1206.09375 1157.15625 1207.0625 1041.75L960.25 1034.25Q943 1145.25 882.765625 1205.71875Q822.53125 1266.1875 699.4375 1266.1875Q639.15625 1266.1875 587.09375 1251.9375Q535.03125 1237.6875 495.859375 1210.875Q456.6875 1184.0625 435 1145.546875Q413.3125 1107.03125 413.3125 1057.5Q413.3125 987.875 461.484375 947.1875Q509.65625 906.5 638.8125 869.625L875.125 807.6875Q1066.375 759.0625 1149.65625 647.90625Q1232.9375 536.75 1232.9375 383.75Q1232.9375 263.40625 1165.890625 172.53125Q1098.84375 81.65625 977.390625 30.828125Q855.9375-20 693.6875-20ZM581.9375-199.3125V59.75H797.3125V-199.3125ZM590.375 1398.0625V1657.125H805.75V1398.0625Z"
+    fill="#111114"
+    transform="translate(49.57 131.93) scale(0.0603 -0.0603)"
   />
 </svg>
