@@ -240,8 +240,9 @@ func ListWaffoPancakeCatalog(c *gin.Context) {
 }
 
 type createWaffoPancakeSubscriptionProductRequest struct {
-	Name   string `json:"name"`
-	Amount string `json:"amount"`
+	Name     string `json:"name"`
+	Amount   string `json:"amount"`
+	Currency string `json:"currency"`
 }
 
 // CreateWaffoPancakeSubscriptionProduct mints an OnetimeProduct (not
@@ -265,6 +266,26 @@ func CreateWaffoPancakeSubscriptionProduct(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "套餐价格不能为空"})
 		return
 	}
+	currency, err := model.NormalizeSubscriptionCurrency(req.Currency)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "套餐结算币种仅支持 USD 或 CNY"})
+		return
+	}
+	amount, err := decimal.NewFromString(strings.TrimSpace(req.Amount))
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "套餐价格格式错误"})
+		return
+	}
+	amountInUSD, err := model.ConvertSubscriptionPrice(
+		amount.InexactFloat64(),
+		currency,
+		model.SubscriptionCurrencyUSD,
+		operation_setting.USDExchangeRate,
+	)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "套餐币种或美元汇率配置错误"})
+		return
+	}
 	merchantID, privateKey := resolveWaffoPancakeAdminCreds("", "")
 	storeID := strings.TrimSpace(setting.WaffoPancakeStoreID)
 	if merchantID == "" || privateKey == "" || storeID == "" {
@@ -277,13 +298,13 @@ func CreateWaffoPancakeSubscriptionProduct(c *gin.Context) {
 		privateKey,
 		storeID,
 		req.Name,
-		req.Amount,
+		decimal.NewFromFloat(amountInUSD).StringFixed(2),
 		setting.WaffoPancakeReturnURL,
 	)
 	if err != nil {
 		logger.LogError(c.Request.Context(), fmt.Sprintf(
 			"Waffo Pancake 创建套餐产品失败 store_id=%q name=%q amount=%q error=%q",
-			storeID, req.Name, req.Amount, err.Error(),
+			storeID, req.Name, decimal.NewFromFloat(amountInUSD).StringFixed(2), err.Error(),
 		))
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "创建套餐产品失败"})
 		return

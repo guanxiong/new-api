@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/pkg/cachex"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/samber/hot"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -23,6 +25,56 @@ const (
 	SubscriptionDurationHour   = "hour"
 	SubscriptionDurationCustom = "custom"
 )
+
+// Subscription checkout currencies. API quota remains denominated in the
+// system's internal quota unit regardless of the currency used at checkout.
+const (
+	SubscriptionCurrencyUSD = "USD"
+	SubscriptionCurrencyCNY = "CNY"
+)
+
+func NormalizeSubscriptionCurrency(currency string) (string, error) {
+	normalized := strings.ToUpper(strings.TrimSpace(currency))
+	if normalized == "" {
+		return SubscriptionCurrencyUSD, nil
+	}
+	switch normalized {
+	case SubscriptionCurrencyUSD, SubscriptionCurrencyCNY:
+		return normalized, nil
+	default:
+		return "", fmt.Errorf("unsupported subscription currency: %s", normalized)
+	}
+}
+
+// ConvertSubscriptionPrice converts a checkout amount between the supported
+// currencies. The caller supplies the applicable CNY-per-USD rate for its
+// payment channel or balance conversion.
+func ConvertSubscriptionPrice(priceAmount float64, fromCurrency, toCurrency string, cnyPerUSD float64) (float64, error) {
+	if priceAmount < 0 || math.IsNaN(priceAmount) || math.IsInf(priceAmount, 0) {
+		return 0, errors.New("invalid subscription price")
+	}
+	from, err := NormalizeSubscriptionCurrency(fromCurrency)
+	if err != nil {
+		return 0, err
+	}
+	to, err := NormalizeSubscriptionCurrency(toCurrency)
+	if err != nil {
+		return 0, err
+	}
+	if from == to {
+		return priceAmount, nil
+	}
+	if cnyPerUSD <= 0 || math.IsNaN(cnyPerUSD) || math.IsInf(cnyPerUSD, 0) {
+		return 0, errors.New("invalid CNY per USD rate")
+	}
+
+	amount := decimal.NewFromFloat(priceAmount)
+	rate := decimal.NewFromFloat(cnyPerUSD)
+	if from == SubscriptionCurrencyUSD {
+		return amount.Mul(rate).InexactFloat64(), nil
+	}
+	return amount.Div(rate).InexactFloat64(), nil
+}
 
 // Subscription quota reset period
 const (
@@ -190,6 +242,11 @@ type SubscriptionPlan struct {
 }
 
 func (p *SubscriptionPlan) BeforeCreate(tx *gorm.DB) error {
+	currency, err := NormalizeSubscriptionCurrency(p.Currency)
+	if err != nil {
+		return err
+	}
+	p.Currency = currency
 	now := common.GetTimestamp()
 	p.CreatedAt = now
 	p.UpdatedAt = now
@@ -197,11 +254,21 @@ func (p *SubscriptionPlan) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (p *SubscriptionPlan) BeforeUpdate(tx *gorm.DB) error {
+	currency, err := NormalizeSubscriptionCurrency(p.Currency)
+	if err != nil {
+		return err
+	}
+	p.Currency = currency
 	p.UpdatedAt = common.GetTimestamp()
 	return nil
 }
 
 func (p *SubscriptionPlan) NormalizeDefaults() {
+	if currency, err := NormalizeSubscriptionCurrency(p.Currency); err == nil {
+		p.Currency = currency
+	} else {
+		p.Currency = SubscriptionCurrencyUSD
+	}
 	if p.AllowBalancePay == nil {
 		p.AllowBalancePay = common.GetPointer(true)
 	}
@@ -739,14 +806,23 @@ func AdminBindSubscription(userId int, planId int, sourceNote string) (string, e
 	return "", nil
 }
 
-func calcSubscriptionBalanceQuota(priceAmount float64) (int, error) {
+func calcSubscriptionBalanceQuota(priceAmount float64, currency string) (int, error) {
 	if priceAmount <= 0 {
 		return 0, nil
 	}
 	if common.QuotaPerUnit <= 0 {
 		return 0, errors.New("额度单位配置错误")
 	}
-	quota := decimal.NewFromFloat(priceAmount).
+	priceInUSD, err := ConvertSubscriptionPrice(
+		priceAmount,
+		currency,
+		SubscriptionCurrencyUSD,
+		operation_setting.Price,
+	)
+	if err != nil {
+		return 0, err
+	}
+	quota := decimal.NewFromFloat(priceInUSD).
 		Mul(decimal.NewFromFloat(common.QuotaPerUnit)).
 		Ceil()
 	return common.QuotaFromDecimalStrict(quota)
@@ -777,7 +853,7 @@ func PurchaseSubscriptionWithBalance(userId int, planId int) error {
 			return errors.New("该套餐不允许使用余额兑换")
 		}
 
-		requiredQuota, err := calcSubscriptionBalanceQuota(plan.PriceAmount)
+		requiredQuota, err := calcSubscriptionBalanceQuota(plan.PriceAmount, plan.Currency)
 		if err != nil {
 			return err
 		}

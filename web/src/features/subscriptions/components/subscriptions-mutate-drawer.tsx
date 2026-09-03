@@ -148,6 +148,7 @@ export function SubscriptionsMutateDrawer({
   // Gate "+ Create on Pancake" on the same checks the mint handler runs.
   const watchedTitle = form.watch('title')
   const watchedPrice = form.watch('price_amount')
+  const watchedCurrency = form.watch('currency')
   const pancakeCreateReady =
     typeof watchedTitle === 'string' &&
     watchedTitle.trim().length > 0 &&
@@ -198,6 +199,7 @@ export function SubscriptionsMutateDrawer({
       const res = await createWaffoPancakeSubscriptionProduct({
         name: title,
         amount: priceAmount.toFixed(2),
+        currency: form.getValues('currency'),
       })
       if (
         res.message === 'success' &&
@@ -339,7 +341,7 @@ export function SubscriptionsMutateDrawer({
                       </FormControl>
                       <FormDescription>
                         {t(
-                          'Amount the user pays to purchase this plan; the actual currency depends on the payment gateway.'
+                          'The checkout amount charged to the customer in the selected currency.'
                         )}
                       </FormDescription>
                       <FormMessage />
@@ -349,35 +351,37 @@ export function SubscriptionsMutateDrawer({
 
                 <FormField
                   control={form.control}
-                  name='total_amount'
+                  name='currency'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        {t('Quota ({{currency}})', { currency: currencyLabel })}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type='number'
-                          min={0}
-                          step={tokensOnly ? 1 : 0.01}
-                          placeholder={
-                            tokensOnly
-                              ? t('Enter quota in tokens')
-                              : t('Enter quota in {{currency}}', {
-                                  currency: currencyLabel,
-                                })
-                          }
-                          onChange={(e) =>
-                            field.onChange(
-                              Number.parseFloat(e.target.value) || 0
-                            )
-                          }
-                        />
-                      </FormControl>
+                      <FormLabel>{t('Checkout currency')}</FormLabel>
+                      <Select
+                        items={[
+                          { value: 'CNY', label: t('Chinese yuan (CNY)') },
+                          { value: 'USD', label: t('US dollar (USD)') },
+                        ]}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent alignItemWithTrigger={false}>
+                          <SelectGroup>
+                            <SelectItem value='CNY'>
+                              {t('Chinese yuan (CNY)')}
+                            </SelectItem>
+                            <SelectItem value='USD'>
+                              {t('US dollar (USD)')}
+                            </SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                       <FormDescription>
                         {t(
-                          'Total quota included in the plan, usable per billing period. 0 means unlimited.'
+                          'Epay charges CNY. External product currencies must match this selection.'
                         )}
                       </FormDescription>
                       <FormMessage />
@@ -385,6 +389,57 @@ export function SubscriptionsMutateDrawer({
                   )}
                 />
               </div>
+
+              <div className='bg-muted/40 text-muted-foreground rounded-md border px-3 py-2 text-xs leading-relaxed'>
+                {t(
+                  'Sale price and API quota are separate: customers pay in {{checkoutCurrency}}, while included quota follows the system quota currency ({{quotaCurrency}}).',
+                  {
+                    checkoutCurrency:
+                      watchedCurrency === 'CNY'
+                        ? t('Chinese yuan (CNY)')
+                        : t('US dollar (USD)'),
+                    quotaCurrency: currencyLabel,
+                  }
+                )}
+              </div>
+
+              <FormField
+                control={form.control}
+                name='total_amount'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t('API quota included ({{currency}})', {
+                        currency: currencyLabel,
+                      })}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type='number'
+                        min={0}
+                        step={tokensOnly ? 1 : 0.01}
+                        placeholder={
+                          tokensOnly
+                            ? t('Enter quota in tokens')
+                            : t('Enter quota in {{currency}}', {
+                                currency: currencyLabel,
+                              })
+                        }
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value) || 0)
+                        }
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'API credit granted by the plan for each billing period. 0 means unlimited.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
                 <FormField

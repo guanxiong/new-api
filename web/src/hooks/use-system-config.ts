@@ -45,6 +45,7 @@ interface StatusApiResponse {
     quota_display_type?: CurrencyDisplayType
     quota_per_unit?: number
     usd_exchange_rate?: number
+    price?: number
     custom_currency_symbol?: string
     custom_currency_exchange_rate?: number
   }
@@ -82,6 +83,10 @@ export function mapStatusDataToConfig(
     usdExchangeRate: toNumber(
       data.usd_exchange_rate,
       DEFAULT_CURRENCY_CONFIG.usdExchangeRate
+    ),
+    rechargePricePerUSD: toNumber(
+      data.price,
+      DEFAULT_CURRENCY_CONFIG.rechargePricePerUSD
     ),
     customCurrencySymbol:
       data.custom_currency_symbol?.trim() ||

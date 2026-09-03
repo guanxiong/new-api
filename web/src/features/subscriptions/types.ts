@@ -22,12 +22,14 @@ import { z } from 'zod'
 // Subscription Plan Schema & Types
 // ============================================================================
 
+export type SubscriptionCurrency = 'USD' | 'CNY'
+
 export const subscriptionPlanSchema = z.object({
   id: z.number(),
   title: z.string(),
   subtitle: z.string().optional(),
   price_amount: z.number(),
-  currency: z.string().default('USD'),
+  currency: z.enum(['USD', 'CNY']).default('USD'),
   duration_unit: z.enum(['year', 'month', 'day', 'hour', 'custom']),
   duration_value: z.number(),
   custom_seconds: z.number().optional(),

@@ -167,6 +167,7 @@ export async function paySubscriptionBalance(
 export async function createWaffoPancakeSubscriptionProduct(data: {
   name: string
   amount: string
+  currency: 'USD' | 'CNY'
 }): Promise<
   ApiResponse<{ product_id: string; product_name: string; store_id: string }>
 > {

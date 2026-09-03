@@ -45,7 +45,13 @@ import {
   paySubscriptionWaffoPancake,
   paySubscriptionBalance,
 } from '../../api'
-import { formatDuration, formatResetPeriod } from '../../lib'
+import {
+  calculatePlanBalanceQuota,
+  formatDuration,
+  formatPlanPrice,
+  formatResetPeriod,
+  normalizePlanCurrency,
+} from '../../lib'
 import type { PlanRecord } from '../../types'
 
 interface PaymentMethod {
@@ -98,14 +104,19 @@ export function SubscriptionPurchaseDialog(props: Props) {
     selectedEpayMethod ||
     t('Select payment method')
   const totalAmount = Number(plan.total_amount || 0)
-  const price = Number(plan.price_amount || 0).toFixed(2)
+  const price = Number(plan.price_amount || 0)
+  const checkoutCurrency = normalizePlanCurrency(plan.currency)
+  const checkoutCurrencyLabel =
+    checkoutCurrency === 'CNY' ? t('Chinese yuan (CNY)') : t('US dollar (USD)')
   const quotaPerUnit =
     currency?.quotaPerUnit && currency.quotaPerUnit > 0
       ? currency.quotaPerUnit
       : DEFAULT_CURRENCY_CONFIG.quotaPerUnit
-  const balanceCost = Math.max(
-    0,
-    Math.ceil(Number(plan.price_amount || 0) * quotaPerUnit)
+  const balanceCost = calculatePlanBalanceQuota(
+    price,
+    checkoutCurrency,
+    currency?.rechargePricePerUSD || 1,
+    quotaPerUnit
   )
   const userQuota = Math.max(0, Number(props.userQuota || 0))
   const allowBalancePay = plan.allow_balance_pay !== false
@@ -299,7 +310,7 @@ export function SubscriptionPurchaseDialog(props: Props) {
           )}
           <div className='flex items-center justify-between'>
             <span className='text-muted-foreground text-sm'>
-              {t('Plan Quota')}
+              {t('API quota included')}
             </span>
             <span className='flex items-center gap-1 text-sm'>
               <Package className='h-3.5 w-3.5' />
@@ -316,9 +327,17 @@ export function SubscriptionPurchaseDialog(props: Props) {
           )}
           <Separator />
           <div className='flex items-center justify-between'>
-            <span className='text-sm font-medium'>{t('Amount Due')}</span>
-            <span className='text-primary text-lg font-bold'>${price}</span>
+            <span className='text-sm font-medium'>{t('Online payment')}</span>
+            <span className='text-primary text-lg font-bold'>
+              {formatPlanPrice(price, checkoutCurrency, true)}
+            </span>
           </div>
+          <p className='text-muted-foreground text-xs leading-relaxed'>
+            {t(
+              'Checkout currency: {{currency}}. Included API quota and wallet balance are shown separately.',
+              { currency: checkoutCurrencyLabel }
+            )}
+          </p>
         </div>
 
         {limitReached && (
@@ -332,11 +351,15 @@ export function SubscriptionPurchaseDialog(props: Props) {
 
         <div className='flex flex-col gap-2 rounded-md border p-3'>
           <div className='flex items-center justify-between gap-2 text-xs'>
-            <span className='text-muted-foreground'>{t('Required')}</span>
+            <span className='text-muted-foreground'>
+              {t('Balance deduction')}
+            </span>
             <span>{formatQuota(balanceCost)}</span>
           </div>
           <div className='flex items-center justify-between gap-2 text-xs'>
-            <span className='text-muted-foreground'>{t('Available')}</span>
+            <span className='text-muted-foreground'>
+              {t('API balance available')}
+            </span>
             <span>{formatQuota(userQuota)}</span>
           </div>
           {!allowBalancePay ? (
@@ -361,6 +384,11 @@ export function SubscriptionPurchaseDialog(props: Props) {
           >
             {t('Pay with Balance')}
           </Button>
+          <p className='text-muted-foreground text-xs leading-relaxed'>
+            {t(
+              'Balance payment deducts the equivalent system API credit; it is not an additional online charge.'
+            )}
+          </p>
         </div>
 
         {hasAnyPayment && (

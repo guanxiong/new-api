@@ -161,10 +161,12 @@ func AdminCreateSubscriptionPlan(c *gin.Context) {
 		common.ApiErrorMsg(c, "价格不能超过9999")
 		return
 	}
-	if req.Plan.Currency == "" {
-		req.Plan.Currency = "USD"
+	currency, err := model.NormalizeSubscriptionCurrency(req.Plan.Currency)
+	if err != nil {
+		common.ApiErrorMsg(c, "套餐结算币种仅支持 USD 或 CNY")
+		return
 	}
-	req.Plan.Currency = "USD"
+	req.Plan.Currency = currency
 	if req.Plan.AllowBalancePay == nil {
 		req.Plan.AllowBalancePay = common.GetPointer(true)
 	}
@@ -204,7 +206,7 @@ func AdminCreateSubscriptionPlan(c *gin.Context) {
 		common.ApiErrorMsg(c, "自定义重置周期需大于0秒")
 		return
 	}
-	err := model.DB.Create(&req.Plan).Error
+	err = model.DB.Create(&req.Plan).Error
 	if err != nil {
 		common.ApiError(c, err)
 		return
@@ -241,10 +243,12 @@ func AdminUpdateSubscriptionPlan(c *gin.Context) {
 		return
 	}
 	req.Plan.Id = id
-	if req.Plan.Currency == "" {
-		req.Plan.Currency = "USD"
+	currency, err := model.NormalizeSubscriptionCurrency(req.Plan.Currency)
+	if err != nil {
+		common.ApiErrorMsg(c, "套餐结算币种仅支持 USD 或 CNY")
+		return
 	}
-	req.Plan.Currency = "USD"
+	req.Plan.Currency = currency
 	if req.Plan.DurationUnit == "" {
 		req.Plan.DurationUnit = model.SubscriptionDurationMonth
 	}
@@ -279,7 +283,7 @@ func AdminUpdateSubscriptionPlan(c *gin.Context) {
 		return
 	}
 
-	err := model.DB.Transaction(func(tx *gorm.DB) error {
+	err = model.DB.Transaction(func(tx *gorm.DB) error {
 		// update plan (allow zero values updates with map)
 		updateMap := map[string]interface{}{
 			"title":                      req.Plan.Title,

@@ -121,6 +121,7 @@ async function renderDrawer(
       quotaDisplayType: currency.quotaDisplayType,
       quotaPerUnit: 500000,
       usdExchangeRate: currency.usdExchangeRate,
+      rechargePricePerUSD: 1,
       customCurrencySymbol: '¤',
       customCurrencyExchangeRate: 1,
     },
