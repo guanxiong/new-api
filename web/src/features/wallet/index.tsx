@@ -30,6 +30,7 @@ import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
 import { RechargeFormCard } from './components/recharge-form-card'
+import { WalletActionGrid } from './components/wallet-action-grid'
 import { WalletStatsCard } from './components/wallet-stats-card'
 import { DEFAULT_DISCOUNT_RATE, PAYMENT_TYPES } from './constants'
 import {
@@ -290,8 +291,8 @@ export function Wallet(props: WalletProps) {
           <div className='mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-5'>
             <WalletStatsCard user={user} loading={userLoading} />
 
-            <div className='grid gap-4'>
-              <div id='wallet-add-funds' className='scroll-mt-4'>
+            <WalletActionGrid>
+              <div id='wallet-add-funds' className='min-w-0 scroll-mt-4'>
                 <RechargeFormCard
                   topupInfo={topupInfo}
                   presetAmounts={presetAmounts}
@@ -326,17 +327,18 @@ export function Wallet(props: WalletProps) {
                   quotaDisplayType={currency?.quotaDisplayType}
                 />
               </div>
-            </div>
-
-            <AffiliateRewardsCard
-              user={user}
-              affiliateLink={affiliateLink}
-              onTransfer={() => setTransferDialogOpen(true)}
-              complianceConfirmed={
-                topupInfo?.payment_compliance_confirmed !== false
-              }
-              loading={affiliateLoading}
-            />
+              <aside className='min-w-0' aria-label={t('Referral Program')}>
+                <AffiliateRewardsCard
+                  user={user}
+                  affiliateLink={affiliateLink}
+                  onTransfer={() => setTransferDialogOpen(true)}
+                  complianceConfirmed={
+                    topupInfo?.payment_compliance_confirmed !== false
+                  }
+                  loading={affiliateLoading}
+                />
+              </aside>
+            </WalletActionGrid>
           </div>
         </SectionPageLayout.Content>
       </SectionPageLayout>
