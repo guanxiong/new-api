@@ -121,6 +121,7 @@ export function RechargeFormCard({
 
   useEffect(() => {
     // Empty string must survive, otherwise the field can never be cleared
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalAmount((prev) =>
       prev === '' && topupAmount === 0 ? prev : topupAmount.toString()
     )
@@ -260,7 +261,10 @@ export function RechargeFormCard({
                   <Label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
                     {t('Amount')}
                   </Label>
-                  <div className='grid grid-cols-2 gap-1.5 sm:gap-3 md:grid-cols-4'>
+                  <div
+                    data-topup-presets
+                    className='grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4'
+                  >
                     {presetAmounts.map((preset) => {
                       const discount =
                         preset.discount ||
@@ -276,9 +280,10 @@ export function RechargeFormCard({
                       return (
                         <Button
                           key={preset.value}
+                          data-topup-preset={preset.value}
                           variant='outline'
                           className={cn(
-                            'flex min-h-16 flex-col items-start rounded-lg px-3 py-2.5 text-left whitespace-normal sm:min-h-[72px] sm:p-4',
+                            'h-auto min-h-[88px] flex-col items-start justify-center gap-2 rounded-lg px-4 py-4 text-left whitespace-normal sm:min-h-24 sm:px-4 sm:py-4',
                             selectedPreset === preset.value
                               ? 'border-foreground bg-foreground/5 dark:border-foreground dark:bg-foreground/10'
                               : 'border-muted'
@@ -290,7 +295,7 @@ export function RechargeFormCard({
                               <div className='text-muted-foreground text-[10px] leading-3 font-medium tracking-wide uppercase'>
                                 {t('You receive')}
                               </div>
-                              <div className='mt-1 text-base font-semibold sm:text-lg'>
+                              <div className='mt-1 text-base leading-tight font-semibold sm:text-lg'>
                                 {formatApiCredit(
                                   preset.value,
                                   quotaDisplayType
@@ -303,7 +308,7 @@ export function RechargeFormCard({
                               </div>
                             )}
                           </div>
-                          <div className='text-muted-foreground mt-1.5 w-full text-xs sm:mt-2'>
+                          <div className='text-muted-foreground w-full text-xs leading-4'>
                             {t('Pay {{amount}}', {
                               amount: formatPaymentAmount(
                                 actualPrice,
