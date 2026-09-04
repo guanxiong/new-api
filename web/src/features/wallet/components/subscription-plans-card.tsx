@@ -61,6 +61,7 @@ import type {
   PlanRecord,
   UserSubscriptionRecord,
 } from '@/features/subscriptions/types'
+import { getCurrencyLabel } from '@/lib/currency'
 import { formatQuota } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -104,6 +105,7 @@ export function SubscriptionPlansCard({
   onPurchaseSuccess,
 }: SubscriptionPlansCardProps) {
   const { t } = useTranslation()
+  const quotaCurrencyLabel = getCurrencyLabel()
 
   const [plans, setPlans] = useState<PlanRecord[]>([])
   const [activeSubscriptions, setActiveSubscriptions] = useState<
@@ -551,7 +553,7 @@ export function SubscriptionPlansCard({
                   ? `${t('Quota Reset')}: ${formatResetPeriod(plan, t)}`
                   : null,
                 totalAmount > 0
-                  ? `${t('API quota included')}: ${formatQuota(totalAmount)}`
+                  ? `${t('API quota included')}: ${formatQuota(totalAmount)} ${quotaCurrencyLabel}`
                   : `${t('API quota included')}: ${t('Unlimited')}`,
                 limit > 0 ? `${t('Purchase Limit')}: ${limit}` : null,
                 plan.upgrade_group
@@ -590,6 +592,11 @@ export function SubscriptionPlansCard({
                     </div>
 
                     <div className='py-2'>
+                      <div className='text-muted-foreground mb-1 text-[11px] font-medium tracking-wide uppercase'>
+                        {t('Online payment ({{currency}})', {
+                          currency: checkoutCurrency,
+                        })}
+                      </div>
                       <span className='text-primary text-2xl font-bold'>
                         {formatPlanPrice(price, checkoutCurrency, true)}
                       </span>

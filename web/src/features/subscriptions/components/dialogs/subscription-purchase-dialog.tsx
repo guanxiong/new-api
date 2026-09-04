@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { useSystemConfig } from '@/hooks/use-system-config'
+import { getCurrencyLabel } from '@/lib/currency'
 import { formatQuota } from '@/lib/format'
 import { DEFAULT_CURRENCY_CONFIG } from '@/stores/system-config-store'
 
@@ -77,6 +78,7 @@ interface Props {
 export function SubscriptionPurchaseDialog(props: Props) {
   const { t } = useTranslation()
   const { currency } = useSystemConfig()
+  const quotaCurrencyLabel = getCurrencyLabel()
   const [paying, setPaying] = useState(false)
   const [selectedEpayMethod, setSelectedEpayMethod] = useState('')
 
@@ -314,7 +316,9 @@ export function SubscriptionPurchaseDialog(props: Props) {
             </span>
             <span className='flex items-center gap-1 text-sm'>
               <Package className='h-3.5 w-3.5' />
-              {totalAmount > 0 ? formatQuota(totalAmount) : t('Unlimited')}
+              {totalAmount > 0
+                ? `${formatQuota(totalAmount)} ${quotaCurrencyLabel}`
+                : t('Unlimited')}
             </span>
           </div>
           {plan.upgrade_group && (
@@ -354,13 +358,17 @@ export function SubscriptionPurchaseDialog(props: Props) {
             <span className='text-muted-foreground'>
               {t('Balance deduction')}
             </span>
-            <span>{formatQuota(balanceCost)}</span>
+            <span>
+              {formatQuota(balanceCost)} {quotaCurrencyLabel}
+            </span>
           </div>
           <div className='flex items-center justify-between gap-2 text-xs'>
             <span className='text-muted-foreground'>
               {t('API balance available')}
             </span>
-            <span>{formatQuota(userQuota)}</span>
+            <span>
+              {formatQuota(userQuota)} {quotaCurrencyLabel}
+            </span>
           </div>
           {!allowBalancePay ? (
             <Alert variant='destructive'>

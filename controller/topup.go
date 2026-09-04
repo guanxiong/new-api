@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -95,6 +96,7 @@ func GetTopUpInfo(c *gin.Context) {
 			payMethods = append(payMethods, waffoMethod)
 		}
 	}
+	payMethods = normalizeTopUpPaymentMethods(payMethods, getWaffoCurrency())
 
 	data := gin.H{
 		"enable_online_topup":              isEpayTopUpEnabled(),
@@ -122,6 +124,34 @@ func GetTopUpInfo(c *gin.Context) {
 		"topup_link":              common.TopUpLink,
 	}
 	common.ApiSuccess(c, data)
+}
+
+func normalizeTopUpPaymentMethods(methods []map[string]string, waffoCurrency string) []map[string]string {
+	normalized := make([]map[string]string, 0, len(methods))
+	for _, method := range methods {
+		copyMethod := make(map[string]string, len(method)+1)
+		for key, value := range method {
+			copyMethod[key] = value
+		}
+
+		currency := strings.ToUpper(strings.TrimSpace(copyMethod["currency"]))
+		if currency == "" {
+			switch copyMethod["type"] {
+			case model.PaymentMethodStripe, model.PaymentMethodWaffoPancake:
+				currency = model.SubscriptionCurrencyUSD
+			case model.PaymentMethodWaffo:
+				currency = strings.ToUpper(strings.TrimSpace(waffoCurrency))
+				if currency == "" {
+					currency = model.SubscriptionCurrencyUSD
+				}
+			default:
+				currency = model.SubscriptionCurrencyCNY
+			}
+		}
+		copyMethod["currency"] = currency
+		normalized = append(normalized, copyMethod)
+	}
+	return normalized
 }
 
 type EpayRequest struct {

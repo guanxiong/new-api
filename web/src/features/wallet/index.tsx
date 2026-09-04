@@ -154,6 +154,13 @@ export function Wallet(props: WalletProps) {
   const getCurrentPaymentType = useCallback(() => {
     return selectedPaymentMethod?.type || getDefaultPaymentType(topupInfo)
   }, [selectedPaymentMethod, topupInfo])
+  const currentPaymentCurrency = useMemo(() => {
+    const paymentType = getCurrentPaymentType()
+    return (
+      topupInfo?.pay_methods?.find((method) => method.type === paymentType)
+        ?.currency || 'CNY'
+    )
+  }, [getCurrentPaymentType, topupInfo?.pay_methods])
 
   // Handle preset selection
   const handleSelectPreset = (preset: PresetAmount) => {
@@ -328,6 +335,8 @@ export function Wallet(props: WalletProps) {
                   enableWaffoPancakeTopup={
                     topupInfo?.enable_waffo_pancake_topup
                   }
+                  paymentCurrency={currentPaymentCurrency}
+                  quotaDisplayType={currency?.quotaDisplayType}
                 />
               </div>
 
@@ -362,7 +371,8 @@ export function Wallet(props: WalletProps) {
         calculating={calculating}
         processing={processing || waffoProcessing || pancakeProcessing}
         discountRate={getDiscountRate()}
-        usdExchangeRate={effectiveUsdExchangeRate}
+        paymentCurrency={currentPaymentCurrency}
+        quotaDisplayType={currency?.quotaDisplayType}
       />
 
       <TransferDialog

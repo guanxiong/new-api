@@ -61,6 +61,47 @@ export function formatCurrency(amount: number | string): string {
   }).format(numeric)
 }
 
+const PAYMENT_CURRENCY_SYMBOLS: Record<string, string> = {
+  CNY: '¥',
+  EUR: '€',
+  GBP: '£',
+  HKD: 'HK$',
+  JPY: '¥',
+  KRW: '₩',
+  SGD: 'S$',
+  USD: '$',
+}
+
+/** Format money already expressed in the payment channel's currency. */
+export function formatPaymentAmount(
+  amount: number | string,
+  currency: string
+): string {
+  const normalizedCurrency = currency.trim().toUpperCase() || 'CNY'
+  const symbol = PAYMENT_CURRENCY_SYMBOLS[normalizedCurrency] || ''
+  const spacing = symbol ? '' : ' '
+  return `${symbol}${formatCurrency(amount)}${spacing} ${normalizedCurrency}`.replaceAll(
+    /\s+/g,
+    ' '
+  )
+}
+
+/** Format the value credited to the API wallet, separately from cash payment. */
+export function formatApiCredit(
+  amount: number | string,
+  displayType: string
+): string {
+  const numeric =
+    typeof amount === 'number' ? amount : Number.parseFloat(String(amount))
+  if (!Number.isFinite(numeric)) return '-'
+  if (displayType.trim().toUpperCase() === 'TOKENS') {
+    return `${new Intl.NumberFormat(undefined, {
+      maximumFractionDigits: 0,
+    }).format(numeric)} Tokens`
+  }
+  return `$${formatCurrency(numeric)} USD`
+}
+
 /**
  * Get discount label for display (e.g., "20% OFF")
  */
