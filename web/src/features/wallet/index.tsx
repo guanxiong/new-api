@@ -30,6 +30,7 @@ import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
 import { RechargeFormCard } from './components/recharge-form-card'
+import { RedemptionCodeCard } from './components/redemption-code-card'
 import { WalletActionGrid } from './components/wallet-action-grid'
 import { WalletStatsCard } from './components/wallet-stats-card'
 import { DEFAULT_DISCOUNT_RATE, PAYMENT_TYPES } from './constants'
@@ -304,11 +305,6 @@ export function Wallet(props: WalletProps) {
                   calculating={calculating}
                   onPaymentMethodSelect={handlePaymentMethodSelect}
                   paymentLoading={paymentLoading}
-                  redemptionCode={redemptionCode}
-                  onRedemptionCodeChange={setRedemptionCode}
-                  onRedeem={handleRedeem}
-                  redeeming={redeeming}
-                  topupLink={topupInfo?.topup_link}
                   loading={topupLoading}
                   priceRatio={(status?.price as number) || 1}
                   usdExchangeRate={effectiveUsdExchangeRate}
@@ -327,7 +323,10 @@ export function Wallet(props: WalletProps) {
                   quotaDisplayType={currency?.quotaDisplayType}
                 />
               </div>
-              <aside className='min-w-0' aria-label={t('Referral Program')}>
+              <aside
+                className='flex min-w-0 flex-col gap-4'
+                aria-label={t('Referral Program')}
+              >
                 <AffiliateRewardsCard
                   user={user}
                   affiliateLink={affiliateLink}
@@ -336,6 +335,15 @@ export function Wallet(props: WalletProps) {
                     topupInfo?.payment_compliance_confirmed !== false
                   }
                   loading={affiliateLoading}
+                />
+                <RedemptionCodeCard
+                  value={redemptionCode}
+                  onValueChange={setRedemptionCode}
+                  onRedeem={handleRedeem}
+                  redeeming={redeeming}
+                  enabled={topupInfo?.enable_redemption !== false}
+                  topupLink={topupInfo?.topup_link}
+                  loading={topupLoading}
                 />
               </aside>
             </WalletActionGrid>

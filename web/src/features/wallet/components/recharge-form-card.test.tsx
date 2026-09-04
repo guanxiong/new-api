@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { TopupInfo } from '../types'
@@ -46,10 +46,6 @@ describe('RechargeFormCard preset layout', () => {
         calculating={false}
         onPaymentMethodSelect={vi.fn()}
         paymentLoading={null}
-        redemptionCode=''
-        onRedemptionCodeChange={vi.fn()}
-        onRedeem={vi.fn()}
-        redeeming={false}
       />
     )
 
@@ -61,5 +57,8 @@ describe('RechargeFormCard preset layout', () => {
     presets.forEach((preset) => {
       expect(preset).toHaveClass('min-h-[88px]', 'py-4', 'justify-center')
     })
+    expect(
+      screen.queryByLabelText('Enter your redemption code')
+    ).not.toBeInTheDocument()
   })
 })
