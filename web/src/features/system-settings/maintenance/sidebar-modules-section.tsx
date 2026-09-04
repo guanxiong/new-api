@@ -124,6 +124,10 @@ export function SidebarModulesSection({
         title: t('Wallet'),
         description: t('Top up balance and view billing history.'),
       },
+      subscription: {
+        title: t('Subscription Plans'),
+        description: t('Subscribe to a plan for model access'),
+      },
       personal: {
         title: t('Profile'),
         description: t('Personal settings and profile management.'),
@@ -253,7 +257,7 @@ export function SidebarModulesSection({
                                 checked={Boolean(field.value)}
                                 onCheckedChange={field.onChange}
                                 disabled={
-                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                  // eslint-disable-next-line react-hooks/incompatible-library, @typescript-eslint/no-explicit-any
                                   !form.watch(`${sectionKey}.enabled` as any)
                                 }
                               />
