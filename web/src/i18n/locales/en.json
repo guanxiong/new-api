@@ -3018,6 +3018,8 @@
     "No stores on this merchant yet. Set a return URL and click Create to mint your first pair.": "No stores on this merchant yet. Set a return URL and click Create to mint your first pair.",
     "No subscription plans yet": "No subscription plans yet",
     "No subscription records": "No subscription records",
+    "No active subscription": "No active subscription",
+    "{{count}} active subscriptions": "{{count}} active subscriptions",
     "No Sync": "No Sync",
     "No system announcements": "No system announcements",
     "No system tasks yet.": "No system tasks yet.",

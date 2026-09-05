@@ -166,7 +166,17 @@ export function useUsersColumns(): ColumnDef<User>[] {
       header: t('Quota'),
       cell: ({ row }) => {
         const user = row.original
-        return <UserQuotaCell used={user.used_quota} remaining={user.quota} />
+        return (
+          <UserQuotaCell
+            used={user.used_quota}
+            remaining={user.quota}
+            subscriptionCount={user.active_subscription_count}
+            subscriptionTotal={user.subscription_total_quota}
+            subscriptionUsed={user.subscription_used_quota}
+            subscriptionRemaining={user.subscription_remaining_quota}
+            subscriptionUnlimited={user.subscription_unlimited}
+          />
+        )
       },
       size: 300,
       minSize: 260,

@@ -16,23 +16,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { describe, expect, test } from 'vitest'
 
-import { Users } from '@/features/users'
-import { usersSearchSchema } from '@/features/users/lib/user-search'
-import { ROLE } from '@/lib/roles'
-import { useAuthStore } from '@/stores/auth-store'
+import { usersSearchSchema } from '../user-search'
 
-export const Route = createFileRoute('/_authenticated/users/')({
-  beforeLoad: () => {
-    const { auth } = useAuthStore.getState()
+describe('users search defaults', () => {
+  test('shows enabled users when the page opens without a status query', () => {
+    expect(usersSearchSchema.parse({}).status).toEqual(['1'])
+  })
 
-    if (!auth.user || auth.user.role < ROLE.ADMIN) {
-      throw redirect({
-        to: '/403',
-      })
-    }
-  },
-  validateSearch: usersSearchSchema,
-  component: Users,
+  test('keeps an explicitly selected disabled status', () => {
+    expect(usersSearchSchema.parse({ status: ['2'] }).status).toEqual(['2'])
+  })
 })

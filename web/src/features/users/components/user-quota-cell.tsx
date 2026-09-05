@@ -31,6 +31,11 @@ import { cn } from '@/lib/utils'
 type UserQuotaCellProps = {
   used: number
   remaining: number
+  subscriptionCount: number
+  subscriptionTotal: number
+  subscriptionUsed: number
+  subscriptionRemaining: number
+  subscriptionUnlimited: boolean
 }
 
 function getQuotaProgressColor(percentage: number): string {
@@ -41,58 +46,126 @@ function getQuotaProgressColor(percentage: number): string {
 
 export function UserQuotaCell(props: UserQuotaCellProps) {
   const { t } = useTranslation()
-  const total = props.used + props.remaining
-  const percentage = total > 0 ? (props.remaining / total) * 100 : 0
-  const formattedRemaining = formatQuota(props.remaining)
-  const formattedTotal = formatQuota(total)
+  const walletTotal = props.used + props.remaining
+  const walletPercentage =
+    walletTotal > 0 ? (props.remaining / walletTotal) * 100 : 0
+  const subscriptionPercentage =
+    props.subscriptionTotal > 0
+      ? (props.subscriptionRemaining / props.subscriptionTotal) * 100
+      : 0
 
-  if (total === 0) {
-    return (
-      <StatusBadge
-        label={t('No Quota')}
-        variant='neutral'
-        copyable={false}
-        className='-ml-1.5'
-      />
-    )
-  }
+  const walletRemaining = formatQuota(props.remaining)
+  const walletTotalFormatted = formatQuota(walletTotal)
+  const subscriptionRemaining = props.subscriptionUnlimited
+    ? t('Unlimited')
+    : formatQuota(props.subscriptionRemaining)
+  const subscriptionTotal = props.subscriptionUnlimited
+    ? t('Unlimited')
+    : formatQuota(props.subscriptionTotal)
 
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <div className='w-full min-w-0 cursor-help space-y-1.5 overflow-hidden' />
-        }
-      >
-        <div className='grid min-w-0 grid-cols-2 gap-x-4 text-xs'>
-          <span className='min-w-0 truncate font-medium tabular-nums'>
-            {formattedRemaining}
+    <div className='w-full min-w-0 space-y-2.5 overflow-hidden py-1'>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <div className='w-full min-w-0 cursor-help space-y-1 overflow-hidden' />
+          }
+        >
+          <div className='flex min-w-0 items-center justify-between gap-3 text-xs'>
+            <span className='text-muted-foreground shrink-0'>
+              {t('Wallet')}
+            </span>
+            <span className='min-w-0 truncate font-medium tabular-nums'>
+              {walletRemaining}
+              <span className='text-muted-foreground font-normal'>
+                {' / '}
+                {walletTotalFormatted}
+              </span>
+            </span>
+          </div>
+          <Progress
+            value={walletPercentage}
+            className={cn('h-1.5', getQuotaProgressColor(walletPercentage))}
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          <div className='space-y-1 text-xs'>
+            <div>
+              {t('Used:')} {formatQuota(props.used)}
+            </div>
+            <div>
+              {t('Remaining:')} {walletRemaining}
+            </div>
+            <div>
+              {t('Total:')} {walletTotalFormatted}
+            </div>
+            <div>
+              {t('Percentage:')} {walletPercentage.toFixed(1)}%
+            </div>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+
+      {props.subscriptionCount > 0 ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <div className='w-full min-w-0 cursor-help space-y-1 overflow-hidden' />
+            }
+          >
+            <div className='flex min-w-0 items-center justify-between gap-3 text-xs'>
+              <span className='text-muted-foreground shrink-0'>
+                {t('Subscription')}
+              </span>
+              <span className='min-w-0 truncate font-medium tabular-nums'>
+                {subscriptionRemaining}
+                <span className='text-muted-foreground font-normal'>
+                  {' / '}
+                  {subscriptionTotal}
+                </span>
+              </span>
+            </div>
+            <Progress
+              value={props.subscriptionUnlimited ? 100 : subscriptionPercentage}
+              className={cn(
+                'h-1.5',
+                getQuotaProgressColor(
+                  props.subscriptionUnlimited ? 100 : subscriptionPercentage
+                )
+              )}
+            />
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className='space-y-1 text-xs'>
+              <div>
+                {t('{{count}} active subscriptions', {
+                  count: props.subscriptionCount,
+                })}
+              </div>
+              <div>
+                {t('Used:')} {formatQuota(props.subscriptionUsed)}
+              </div>
+              <div>
+                {t('Remaining:')} {subscriptionRemaining}
+              </div>
+              <div>
+                {t('Total:')} {subscriptionTotal}
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        <div className='flex min-w-0 items-center justify-between gap-3 text-xs'>
+          <span className='text-muted-foreground shrink-0'>
+            {t('Subscription')}
           </span>
-          <span className='text-muted-foreground min-w-0 truncate text-right tabular-nums'>
-            {formattedTotal}
-          </span>
+          <StatusBadge
+            label={t('No active subscription')}
+            variant='neutral'
+            copyable={false}
+          />
         </div>
-        <Progress
-          value={percentage}
-          className={cn('h-1.5', getQuotaProgressColor(percentage))}
-        />
-      </TooltipTrigger>
-      <TooltipContent>
-        <div className='space-y-1 text-xs'>
-          <div>
-            {t('Used:')} {formatQuota(props.used)}
-          </div>
-          <div>
-            {t('Remaining:')} {formattedRemaining}
-          </div>
-          <div>
-            {t('Total:')} {formattedTotal}
-          </div>
-          <div>
-            {t('Percentage:')} {percentage.toFixed(1)}%
-          </div>
-        </div>
-      </TooltipContent>
-    </Tooltip>
+      )}
+    </div>
   )
 }

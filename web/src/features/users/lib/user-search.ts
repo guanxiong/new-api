@@ -16,23 +16,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import z from 'zod'
 
-import { Users } from '@/features/users'
-import { usersSearchSchema } from '@/features/users/lib/user-search'
-import { ROLE } from '@/lib/roles'
-import { useAuthStore } from '@/stores/auth-store'
-
-export const Route = createFileRoute('/_authenticated/users/')({
-  beforeLoad: () => {
-    const { auth } = useAuthStore.getState()
-
-    if (!auth.user || auth.user.role < ROLE.ADMIN) {
-      throw redirect({
-        to: '/403',
-      })
-    }
-  },
-  validateSearch: usersSearchSchema,
-  component: Users,
+export const usersSearchSchema = z.object({
+  page: z.number().optional().catch(1),
+  pageSize: z.number().optional().catch(undefined),
+  filter: z.string().optional().catch(''),
+  status: z
+    .array(z.enum(['-1', '1', '2']))
+    .optional()
+    .default(['1'])
+    .catch(['1']),
+  role: z
+    .array(z.enum(['1', '10', '100']))
+    .optional()
+    .catch([]),
+  group: z.string().optional().catch(''),
 })

@@ -430,6 +430,8 @@ export const STATIC_I18N_KEYS = [
   'Add subscription',
   'Loading...',
   'No subscription records',
+  'No active subscription',
+  '{{count}} active subscriptions',
   'Source',
   'Start',
   'End',
