@@ -13,6 +13,9 @@ const (
 	BillingModeTieredExpr = "tiered_expr"
 	BillingModeField      = "billing_mode"
 	BillingExprField      = "billing_expr"
+
+	gpt6AstraModel = "gpt-6-astra"
+	gpt6AstraExpr  = `len <= 272000 ? tier("standard", p * 10 + c * 50 + cr * 1 + cc * 12.5) : tier("long_context", p * 20 + c * 75 + cr * 2 + cc * 25)`
 )
 
 // BillingSetting is managed by config.GlobalConfig.Register.
@@ -23,8 +26,12 @@ type BillingSetting struct {
 }
 
 var billingSetting = BillingSetting{
-	BillingMode: make(map[string]string),
-	BillingExpr: make(map[string]string),
+	BillingMode: map[string]string{
+		gpt6AstraModel: BillingModeTieredExpr,
+	},
+	BillingExpr: map[string]string{
+		gpt6AstraModel: gpt6AstraExpr,
+	},
 }
 
 func init() {
